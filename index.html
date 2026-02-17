@@ -3,51 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produção - Paulo Henrique</title>
+    <title>Sistema de Produção - Paulo</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
-        label { font-weight: bold; font-size: 14px; color: #34495e; display: block; margin-top: 10px; }
+        h2 { text-align: center; color: #1a73e8; margin-bottom: 20px; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
+        label { font-weight: bold; font-size: 13px; color: #444; display: block; margin-top: 10px; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .btn-add { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 20px; cursor: pointer; }
-        .card { background: white; border-left: 8px solid #3498db; padding: 15px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card.concluido { border-left-color: #95a5a6; background: #f0f0f0; opacity: 0.7; }
-        .detalhes { font-size: 0.9rem; color: #555; margin: 5px 0; }
-        .tag-pagamento { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #e1f5fe; color: #0288d1; }
-        .btn-done { background: #3498db; color: white; border: none; padding: 10px; border-radius: 4px; width: 100%; margin-top: 10px; cursor: pointer; }
-        .btn-del { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; margin-top: 10px; cursor: pointer; float: right; }
+        .btn-add { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 20px; cursor: pointer; font-size: 16px; }
+        .card { background: white; border-left: 8px solid #1a73e8; padding: 15px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
+        .card.concluido { border-left-color: #6c757d; background: #f8f9fa; opacity: 0.7; }
+        .cliente-nome { font-size: 1.2rem; color: #1a73e8; font-weight: bold; }
+        .detalhes { font-size: 0.95rem; color: #333; margin: 8px 0; line-height: 1.4; }
+        .tag-pg { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #fff3cd; color: #856404; }
+        .tag-pago { background: #d4edda; color: #155724; }
+        .btn-done { background: #1a73e8; color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        .btn-del { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; position: absolute; top: 10px; right: 10px; cursor: pointer; }
+        .data-venc { font-size: 0.85rem; color: #d93025; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🚀 Lançar Pedido</h2>
+    <h2>📦 Novo Pedido</h2>
+    
+    <label>Nome do Cliente:</label>
+    <input type="text" id="cliente" placeholder="Quem comprou?">
+
+    <label>Data prevista para envio:</label>
+    <input type="datetime-local" id="dataEnvio">
     
     <label>Produto:</label>
-    <input type="text" id="produto" placeholder="Ex: Camiseta">
+    <input type="text" id="produto" placeholder="O que é?">
     
     <label>Cor:</label>
-    <input type="text" id="cor" placeholder="Ex: Azul Marinho">
+    <input type="text" id="cor" placeholder="Ex: Branco">
     
     <label>Estampa:</label>
-    <input type="text" id="estampa" placeholder="Ex: Logo Frente">
+    <input type="text" id="estampa" placeholder="Ex: Logo nas costas">
     
     <label>Pagamento:</label>
     <select id="quitado">
-        <option value="PENDENTE">Ainda não pagou</option>
-        <option value="METADE">Metade (50%)</option>
-        <option value="TOTAL">Total (Quitado)</option>
+        <option value="PENDENTE">Aguardando Pagamento</option>
+        <option value="METADE">50% (Sinal)</option>
+        <option value="TOTAL">100% (Quitado)</option>
     </select>
 
-    <button class="btn-add" onclick="enviar()">ENVIAR PARA PRODUÇÃO</button>
+    <button class="btn-add" onclick="enviar()">LANÇAR PARA PRODUÇÃO</button>
     
-    <hr style="margin-top: 25px;">
-    <div id="lista">Carregando produção...</div>
+    <div id="lista" style="margin-top: 20px;">Carregando pedidos...</div>
 </div>
 
 <script>
-    // COLOQUE SUA URL ENTRE AS ASPAS ABAIXO
+    // COLE SUA URL /exec ABAIXO
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec";
 
     async function listar() {
@@ -57,17 +65,24 @@
             const lista = document.getElementById('lista');
             lista.innerHTML = '';
             
+            // Inverte para os mais novos aparecerem em cima
             data.reverse().forEach(p => {
                 const isDone = p.status === "CONCLUÍDO";
                 const div = document.createElement('div');
                 div.className = `card ${isDone ? 'concluido' : ''}`;
+                
+                const dataFormatada = new Date(p.dataEnvio).toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+
                 div.innerHTML = `
-                    <button class="btn-del" onclick="deletar('${p.id}')">🗑️</button>
-                    <strong>📦 ${p.produto}</strong>
-                    <div class="detalhes">🎨 Cor: ${p.cor} | 🖼️ Estampa: ${p.estampa}</div>
-                    <div class="tag-pagamento">💰 Pagto: ${p.quitado}</div>
-                    <div style="font-size:12px; color:gray; margin-top:5px;">Status: ${p.status}</div>
-                    ${!isDone ? `<button class="btn-done" onclick="marcar('${p.id}')">Finalizar Produção</button>` : ''}
+                    <button class="btn-del" onclick="deletar('${p.id}')">X</button>
+                    <div class="cliente-nome">👤 ${p.cliente}</div>
+                    <div class="data-venc">📅 Envio: ${dataFormatada}</div>
+                    <div class="detalhes">
+                        <strong>Produto:</strong> ${p.produto}<br>
+                        <strong>🎨 Cor:</strong> ${p.cor} | <strong>🖼️ Estampa:</strong> ${p.estampa}
+                    </div>
+                    <div class="tag-pg ${p.quitado === 'TOTAL' ? 'tag-pago' : ''}">💰 ${p.quitado}</div>
+                    ${!isDone ? `<button class="btn-done" onclick="marcar('${p.id}')">Marcar como Pronto</button>` : '<div style="margin-top:10px; color:green; font-weight:bold;">✓ PRODUÇÃO FINALIZADA</div>'}
                 `;
                 lista.appendChild(div);
             });
@@ -75,18 +90,32 @@
     }
 
     async function enviar() {
+        const cli = document.getElementById('cliente').value;
+        const dat = document.getElementById('dataEnvio').value;
         const prod = document.getElementById('produto').value;
         const cor = document.getElementById('cor').value;
         const est = document.getElementById('estampa').value;
         const qui = document.getElementById('quitado').value;
 
-        if(!prod) return alert("Digite ao menos o produto!");
+        if(!cli || !prod || !dat) return alert("Preencha Cliente, Produto e Data!");
 
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: "add", id: Date.now(), produto: prod, cor: cor, estampa: est, quitado: qui })
+            body: JSON.stringify({ 
+                action: "add", 
+                id: Date.now(), 
+                cliente: cli, 
+                dataEnvio: dat, 
+                produto: prod, 
+                cor: cor, 
+                estampa: est, 
+                quitado: qui 
+            })
         });
         
+        // Limpa os campos
+        document.getElementById('cliente').value = '';
+        document.getElementById('dataEnvio').value = '';
         document.getElementById('produto').value = '';
         document.getElementById('cor').value = '';
         document.getElementById('estampa').value = '';
@@ -99,13 +128,13 @@
     }
 
     async function deletar(id) {
-        if(confirm("Excluir definitivamente?")) {
+        if(confirm("Deseja excluir este pedido?")) {
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
             listar();
         }
     }
 
-    setInterval(listar, 8000); 
+    setInterval(listar, 10000); 
     listar();
 </script>
 
