@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Pedidos - Paulo</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #e8ecef; margin: 0; padding: 15px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-add { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .card { background: #fff; border-left: 8px solid #3498db; padding: 15px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .concluido { border-left-color: #bdc3c7; background: #f9f9f9; opacity: 0.6; }
+        .concluido .pedido-nome { text-decoration: line-through; }
+        .data-envio { font-size: 0.85rem; color: #7f8c8d; }
+        .acoes { margin-top: 10px; display: flex; gap: 5px; }
+        .btn-done { background: #3498db; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; flex: 1; }
+        .btn-del { background: #e74c3c; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; }
+        .status-tag { font-weight: bold; font-size: 0.7rem; padding: 3px 6px; border-radius: 4px; background: #eee; float: right; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📦 Controle de Pedidos</h2>
+    <input type="text" id="p_nome" placeholder="Nome do Pedido / Cliente">
+    <label style="font-size: 12px;">Data de Envio:</label>
+    <input type="datetime-local" id="p_data">
+    <button class="btn-add" onclick="enviarPedido()">LANÇAR PEDIDO</button>
+    <div id="lista">Carregando pedidos...</div>
+</div>
+
+<script>
+    
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxRpfWwZIfohML9POt_1DR6qABv8LH_DiUZ1kPJzm2Ad7v4PWtcutUB0srS8Bqukrc4IQ/exec";
+
+    async function listar() {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        const lista = document.getElementById('lista');
+        lista.innerHTML = '';
+        
+        data.forEach(p => {
+            const isDone = p.status === "CONCLUÍDO";
+            const div = document.createElement('div');
+            div.className = `card ${isDone ? 'concluido' : ''}`;
+            div.innerHTML = `
+                <span class="status-tag">${p.status}</span>
+                <div class="pedido-nome"><strong>${p.pedido}</strong></div>
+                <div class="data-envio">🚚 Envio: ${new Date(p.dataEnvio).toLocaleString('pt-BR')}</div>
+                <div class="acoes">
+                    ${!isDone ? `<button class="btn-done" onclick="marcar('${p.id}')">✔️ Concluir</button>` : ''}
+                    <button class="btn-del" onclick="deletar('${p.id}')">🗑️</button>
+                </div>
+            `;
+            lista.appendChild(div);
+        });
+    }
+
+    async function enviarPedido() {
+        const nome = document.getElementById('p_nome').value;
+        const data = document.getElementById('p_data').value;
+        if(!nome || !data) return alert("Preencha tudo!");
+
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "add", id: Date.now(), pedido: nome, dataEnvio: data })
+        });
+        document.getElementById('p_nome').value = '';
+        listar();
+    }
+
+    async function marcar(id) {
+        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "done", id: id }) });
+        listar();
+    }
+
+    async function deletar(id) {
+        if(confirm("Excluir pedido definitivamente?")) {
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
+            listar();
+        }
+    }
+
+    setInterval(listar, 10000); // Atualiza sozinho a cada 10 segundos
+    listar();
+</script>
+
+</body>
+</html>
