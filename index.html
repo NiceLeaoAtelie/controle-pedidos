@@ -8,54 +8,75 @@
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #1a73e8; margin-bottom: 20px; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
-        label { font-weight: bold; font-size: 13px; color: #444; display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .btn-add { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 20px; cursor: pointer; font-size: 16px; }
-        .card { background: white; border-left: 8px solid #1a73e8; padding: 15px; margin-top: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
+        
+        /* Estilo dos Campos de Entrada */
+        .campo-grupo { margin-bottom: 15px; }
+        label { font-weight: bold; font-size: 14px; color: #333; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: #1a73e8; outline: none; }
+
+        .btn-add { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; font-size: 18px; }
+        
+        /* Estilo dos Cards de Pedido */
+        .card { background: white; border-left: 8px solid #1a73e8; padding: 15px; margin-top: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
         .card.concluido { border-left-color: #6c757d; background: #f8f9fa; opacity: 0.7; }
-        .cliente-nome { font-size: 1.2rem; color: #1a73e8; font-weight: bold; }
-        .detalhes { font-size: 0.95rem; color: #333; margin: 8px 0; line-height: 1.4; }
-        .tag-pg { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #fff3cd; color: #856404; }
+        .cliente-nome { font-size: 1.2rem; color: #1a73e8; font-weight: bold; margin-bottom: 5px; }
+        .data-venc { font-size: 0.9rem; color: #d93025; font-weight: bold; margin-bottom: 10px; }
+        .detalhes { font-size: 1rem; color: #333; line-height: 1.5; background: #f9f9f9; padding: 8px; border-radius: 5px; }
+        .tag-pg { display: inline-block; margin-top: 10px; padding: 4px 10px; border-radius: 5px; font-size: 13px; font-weight: bold; background: #fff3cd; color: #856404; }
         .tag-pago { background: #d4edda; color: #155724; }
-        .btn-done { background: #1a73e8; color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        
+        .btn-done { background: #1a73e8; color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; margin-top: 15px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .btn-del { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; position: absolute; top: 10px; right: 10px; cursor: pointer; }
-        .data-venc { font-size: 0.85rem; color: #d93025; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📦 Novo Pedido</h2>
+    <h2>📦 Lançar Novo Pedido</h2>
     
-    <label>Nome do Cliente:</label>
-    <input type="text" id="cliente" placeholder="Quem comprou?">
+    <div class="campo-grupo">
+        <label>👤 Nome do Cliente:</label>
+        <input type="text" id="cliente" placeholder="Ex: João Silva">
+    </div>
 
-    <label>Data prevista para envio:</label>
-    <input type="datetime-local" id="dataEnvio">
+    <div class="campo-grupo">
+        <label>📅 Data e Hora de Envio:</label>
+        <input type="datetime-local" id="dataEnvio">
+    </div>
     
-    <label>Produto:</label>
-    <input type="text" id="produto" placeholder="O que é?">
+    <div class="campo-grupo">
+        <label>👕 Produto:</label>
+        <input type="text" id="produto" placeholder="Ex: Camisa Polo">
+    </div>
     
-    <label>Cor:</label>
-    <input type="text" id="cor" placeholder="Ex: Branco">
+    <div class="campo-grupo">
+        <label>🎨 Cor:</label>
+        <input type="text" id="cor" placeholder="Ex: Azul Marinho">
+    </div>
     
-    <label>Estampa:</label>
-    <input type="text" id="estampa" placeholder="Ex: Logo nas costas">
+    <div class="campo-grupo">
+        <label>🖼️ Estampa:</label>
+        <input type="text" id="estampa" placeholder="Ex: Logo Peito Esquerdo">
+    </div>
     
-    <label>Pagamento:</label>
-    <select id="quitado">
-        <option value="PENDENTE">Aguardando Pagamento</option>
-        <option value="METADE">50% (Sinal)</option>
-        <option value="TOTAL">100% (Quitado)</option>
-    </select>
+    <div class="campo-grupo">
+        <label>💰 Status do Pagamento:</label>
+        <select id="quitado">
+            <option value="PENDENTE">Aguardando Pagamento</option>
+            <option value="METADE">50% (Sinal Pago)</option>
+            <option value="TOTAL">100% (Tudo Pago)</option>
+        </select>
+    </div>
 
-    <button class="btn-add" onclick="enviar()">LANÇAR PARA PRODUÇÃO</button>
+    <button class="btn-add" onclick="enviar()">🚀 LANÇAR PEDIDO</button>
     
-    <div id="lista" style="margin-top: 20px;">Carregando pedidos...</div>
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+    <div id="lista">Aguardando conexão...</div>
 </div>
 
 <script>
-    // COLE SUA URL /exec ABAIXO
+    // ⚠️ SUBSTITUA PELA SUA URL DO GOOGLE (QUE TERMINA EM /EXEC)
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec";
 
     async function listar() {
@@ -65,28 +86,30 @@
             const lista = document.getElementById('lista');
             lista.innerHTML = '';
             
-            // Inverte para os mais novos aparecerem em cima
             data.reverse().forEach(p => {
                 const isDone = p.status === "CONCLUÍDO";
                 const div = document.createElement('div');
                 div.className = `card ${isDone ? 'concluido' : ''}`;
                 
-                const dataFormatada = new Date(p.dataEnvio).toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+                let dataFormatada = "Data não definida";
+                if(p.dataEnvio) {
+                    dataFormatada = new Date(p.dataEnvio).toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'});
+                }
 
                 div.innerHTML = `
                     <button class="btn-del" onclick="deletar('${p.id}')">X</button>
-                    <div class="cliente-nome">👤 ${p.cliente}</div>
-                    <div class="data-venc">📅 Envio: ${dataFormatada}</div>
+                    <div class="cliente-nome">👤 ${p.cliente || 'Sem nome'}</div>
+                    <div class="data-venc">🚚 Envio: ${dataFormatada}</div>
                     <div class="detalhes">
-                        <strong>Produto:</strong> ${p.produto}<br>
-                        <strong>🎨 Cor:</strong> ${p.cor} | <strong>🖼️ Estampa:</strong> ${p.estampa}
+                        <strong>Prod:</strong> ${p.produto}<br>
+                        <strong>Cor/Est:</strong> ${p.cor} | ${p.estampa}
                     </div>
-                    <div class="tag-pg ${p.quitado === 'TOTAL' ? 'tag-pago' : ''}">💰 ${p.quitado}</div>
-                    ${!isDone ? `<button class="btn-done" onclick="marcar('${p.id}')">Marcar como Pronto</button>` : '<div style="margin-top:10px; color:green; font-weight:bold;">✓ PRODUÇÃO FINALIZADA</div>'}
+                    <div class="tag-pg ${p.quitado === 'TOTAL' ? 'tag-pago' : ''}">💰 Pagto: ${p.quitado}</div>
+                    ${!isDone ? `<button class="btn-done" onclick="marcar('${p.id}')">Finalizar Pedido</button>` : '<div style="margin-top:10px; color:green; font-weight:bold; text-align:center;">✓ CONCLUÍDO</div>'}
                 `;
                 lista.appendChild(div);
             });
-        } catch (e) { console.log("Erro ao carregar"); }
+        } catch (e) { document.getElementById('lista').innerHTML = "Erro ao carregar dados."; }
     }
 
     async function enviar() {
@@ -97,7 +120,11 @@
         const est = document.getElementById('estampa').value;
         const qui = document.getElementById('quitado').value;
 
-        if(!cli || !prod || !dat) return alert("Preencha Cliente, Produto e Data!");
+        if(!cli || !prod || !dat) return alert("Por favor, preencha o Cliente, o Produto e a Data!");
+
+        const btn = document.querySelector('.btn-add');
+        btn.innerText = "ENVIANDO...";
+        btn.disabled = true;
 
         await fetch(SCRIPT_URL, {
             method: 'POST',
@@ -113,22 +140,27 @@
             })
         });
         
-        // Limpa os campos
+        // Limpar campos
         document.getElementById('cliente').value = '';
         document.getElementById('dataEnvio').value = '';
         document.getElementById('produto').value = '';
         document.getElementById('cor').value = '';
         document.getElementById('estampa').value = '';
+        
+        btn.innerText = "🚀 LANÇAR PEDIDO";
+        btn.disabled = false;
         listar();
     }
 
     async function marcar(id) {
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "done", id: id }) });
-        listar();
+        if(confirm("Deseja marcar como concluído?")) {
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "done", id: id }) });
+            listar();
+        }
     }
 
     async function deletar(id) {
-        if(confirm("Deseja excluir este pedido?")) {
+        if(confirm("Excluir definitivamente?")) {
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
             listar();
         }
