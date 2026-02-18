@@ -56,8 +56,7 @@
 </div>
 
 <script>
-    // ⚠️ COLOQUE SUA URL DO GOOGLE ABAIXO
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec"; 
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec"; // 👈 NÃO ESQUEÇA DE COLAR SEU LINK AQUI
     
     const params = new URLSearchParams(window.location.search);
     const eProducao = params.has('producao');
@@ -79,48 +78,49 @@
                 return;
             }
 
-            // ORDENAÇÃO POR DATA (O mais próximo primeiro)
+            // Ordena por data (mais urgente primeiro)
             data.sort((a, b) => new Date(a.dataEnvio) - new Date(b.dataEnvio));
 
             listaDiv.innerHTML = '';
             data.forEach(p => {
-                // Se estiver enviado, só mostramos na tela de gestão
+                // Se for tela de produção e o pedido já foi enviado, não mostra.
                 if (eProducao && p.status == "Enviado") return;
 
+                let statusTexto = p.status || "Criar arte";
                 let classeStatus = "status-arte";
-                if(p.status == "Esperando aprovação") classeStatus = "status-espera";
-                if(p.status == "Mesa de produção") classeStatus = "status-producao";
-                if(p.status == "Preparando") classeStatus = "status-preparando";
-                if(p.status == "Enviado") classeStatus = "status-enviado";
+                if(statusTexto == "Esperando aprovação") classeStatus = "status-espera";
+                if(statusTexto == "Mesa de produção") classeStatus = "status-producao";
+                if(statusTexto == "Preparando") classeStatus = "status-preparando";
+                if(statusTexto == "Enviado") classeStatus = "status-enviado";
 
                 const div = document.createElement('div');
                 div.className = `card ${classeStatus}`;
-                const idx = FLUXO.indexOf(p.status);
+                const idx = FLUXO.indexOf(statusTexto);
                 const proximo = FLUXO[idx + 1];
 
                 const d = new Date(p.dataEnvio);
-                const dataFormatada = d.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+                const dataF = isNaN(d) ? "Sem data" : d.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
 
                 div.innerHTML = `
                     <button class="btn-del" onclick="deletar('${p.id}')">×</button>
-                    <div class="tag-status">${p.status ? p.status.toUpperCase() : 'SEM STATUS'}</div>
+                    <div class="tag-status">${statusTexto.toUpperCase()}</div>
                     <div class="cliente">${p.cliente || 'Sem Nome'}</div>
                     <div class="detalhes">
                         <strong>Produto:</strong> ${p.produto || '-'}<br>
                         <strong>Detalhes:</strong> ${p.cor || '-'}
                     </div>
-                    <div class="urgente">⏰ Envio: ${dataFormatada}</div>
+                    <div class="urgente">⏰ Envio: ${dataF}</div>
                     <div style="font-size: 0.8rem; color: #555; margin-top:5px;">💰 Financeiro: ${p.quitado || '-'}</div>
                     
                     ${proximo ? 
                         `<button class="btn-proximo" onclick="mudarStatus('${p.id}', '${proximo}')">AVANÇAR PARA: ${proximo.toUpperCase()} ➔</button>` : 
-                        `<div style="color: green; font-weight: bold; margin-top: 10px; text-align: center;">✅ FINALIZADO</div>`
+                        `<div style="color: green; font-weight: bold; margin-top: 10px; text-align: center;">✅ FINALIZADO / ENVIADO</div>`
                     }
                 `;
                 listaDiv.appendChild(div);
             });
         } catch (e) { 
-            document.getElementById('lista').innerHTML = "Erro de conexão."; 
+            document.getElementById('lista').innerHTML = "Erro ao carregar dados. Verifique a conexão."; 
         }
     }
 
@@ -146,6 +146,7 @@
         } catch(e) {
             alert("Erro ao salvar.");
             btn.disabled = false;
+            btn.innerText = "LANÇAR NO SISTEMA";
         }
     }
 
