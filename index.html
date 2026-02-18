@@ -3,172 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Produção - Paulo</title>
+    <title>Sistema Paulo - Fluxo Total</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #1a73e8; margin-bottom: 20px; border-bottom: 2px solid #1a73e8; padding-bottom: 10px; }
+        :root {
+            --cor-arte: #9b59b6; /* Roxo */
+            --cor-espera: #f1c40f; /* Amarelo */
+            --cor-producao: #e67e22; /* Laranja */
+            --cor-preparando: #3498db; /* Azul */
+            --cor-enviado: #2ecc71; /* Verde */
+        }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 10px; margin: 0; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         
-        /* Estilo dos Campos de Entrada */
-        .campo-grupo { margin-bottom: 15px; }
-        label { font-weight: bold; font-size: 14px; color: #333; display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        input:focus { border-color: #1a73e8; outline: none; }
+        .form-box { background: #eee; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        input, select, button { width: 100%; padding: 12px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        
+        .card { padding: 15px; margin-top: 15px; border-radius: 8px; border-left: 10px solid #ccc; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        
+        /* Cores Dinâmicas dos Status */
+        .status-arte { border-left-color: var(--cor-arte); }
+        .status-espera { border-left-color: var(--cor-espera); }
+        .status-producao { border-left-color: var(--cor-producao); }
+        .status-preparando { border-left-color: var(--cor-preparando); }
+        .status-enviado { border-left-color: var(--cor-enviado); background: #f0fff4; }
 
-        .btn-add { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; font-size: 18px; }
+        .cliente { font-weight: bold; font-size: 1.1rem; color: #333; }
+        .badge { display: inline-block; padding: 3px 8px; font-size: 11px; border-radius: 10px; background: #eee; font-weight: bold; margin-bottom: 5px; }
         
-        /* Estilo dos Cards de Pedido */
-        .card { background: white; border-left: 8px solid #1a73e8; padding: 15px; margin-top: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
-        .card.concluido { border-left-color: #6c757d; background: #f8f9fa; opacity: 0.7; }
-        .cliente-nome { font-size: 1.2rem; color: #1a73e8; font-weight: bold; margin-bottom: 5px; }
-        .data-venc { font-size: 0.9rem; color: #d93025; font-weight: bold; margin-bottom: 10px; }
-        .detalhes { font-size: 1rem; color: #333; line-height: 1.5; background: #f9f9f9; padding: 8px; border-radius: 5px; }
-        .tag-pg { display: inline-block; margin-top: 10px; padding: 4px 10px; border-radius: 5px; font-size: 13px; font-weight: bold; background: #fff3cd; color: #856404; }
-        .tag-pago { background: #d4edda; color: #155724; }
-        
-        .btn-done { background: #1a73e8; color: white; border: none; padding: 12px; border-radius: 6px; width: 100%; margin-top: 15px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        .btn-del { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; position: absolute; top: 10px; right: 10px; cursor: pointer; }
+        .btn-proximo { background: #333; color: white; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; }
+        .btn-del { position: absolute; top: 10px; right: 10px; background: none; border: none; color: #ccc; cursor: pointer; width: auto; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📦 Lançar Novo Pedido</h2>
-    
-    <div class="campo-grupo">
-        <label>👤 Nome do Cliente:</label>
-        <input type="text" id="cliente" placeholder="Ex: João Silva">
+    <h2 id="titulo">Gestão de Fluxo Paulo</h2>
+
+    <div id="area-cadastro" class="form-box">
+        <input type="text" id="cli" placeholder="Nome do Cliente">
+        <input type="text" id="prod" placeholder="Produto, Cor e Estampa">
+        <label style="font-size: 12px; margin-top: 10px; display: block;">Prazo de Envio:</label>
+        <input type="datetime-local" id="data">
+        <button onclick="cadastrar()" style="background: #1a73e8; color: white; border: none; font-weight: bold;">LANÇAR PEDIDO</button>
     </div>
 
-    <div class="campo-grupo">
-        <label>📅 Data e Hora de Envio:</label>
-        <input type="datetime-local" id="dataEnvio">
-    </div>
-    
-    <div class="campo-grupo">
-        <label>👕 Produto:</label>
-        <input type="text" id="produto" placeholder="Ex: Camisa Polo">
-    </div>
-    
-    <div class="campo-grupo">
-        <label>🎨 Cor:</label>
-        <input type="text" id="cor" placeholder="Ex: Azul Marinho">
-    </div>
-    
-    <div class="campo-grupo">
-        <label>🖼️ Estampa:</label>
-        <input type="text" id="estampa" placeholder="Ex: Logo Peito Esquerdo">
-    </div>
-    
-    <div class="campo-grupo">
-        <label>💰 Status do Pagamento:</label>
-        <select id="quitado">
-            <option value="PENDENTE">Aguardando Pagamento</option>
-            <option value="METADE">50% (Sinal Pago)</option>
-            <option value="TOTAL">100% (Tudo Pago)</option>
-        </select>
-    </div>
-
-    <button class="btn-add" onclick="enviar()">🚀 LANÇAR PEDIDO</button>
-    
-    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-    <div id="lista">Aguardando conexão...</div>
+    <div id="lista">Carregando pedidos...</div>
 </div>
 
 <script>
-    // ⚠️ SUBSTITUA PELA SUA URL DO GOOGLE (QUE TERMINA EM /EXEC)
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec";
+    const SCRIPT_URL = "SUA_URL_AQUI"; // https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec
+    const params = new URLSearchParams(window.location.search);
+    const eProducao = params.has('producao');
 
-    async function listar() {
-        try {
-            const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
-            const lista = document.getElementById('lista');
-            lista.innerHTML = '';
-            
-            data.reverse().forEach(p => {
-                const isDone = p.status === "CONCLUÍDO";
-                const div = document.createElement('div');
-                div.className = `card ${isDone ? 'concluido' : ''}`;
-                
-                let dataFormatada = "Data não definida";
-                if(p.dataEnvio) {
-                    dataFormatada = new Date(p.dataEnvio).toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit'});
-                }
+    const FLUXO = ["Criar arte", "Esperando aprovação", "Mesa de produção", "Preparando", "Enviado"];
 
-                div.innerHTML = `
-                    <button class="btn-del" onclick="deletar('${p.id}')">X</button>
-                    <div class="cliente-nome">👤 ${p.cliente || 'Sem nome'}</div>
-                    <div class="data-venc">🚚 Envio: ${dataFormatada}</div>
-                    <div class="detalhes">
-                        <strong>Prod:</strong> ${p.produto}<br>
-                        <strong>Cor/Est:</strong> ${p.cor} | ${p.estampa}
-                    </div>
-                    <div class="tag-pg ${p.quitado === 'TOTAL' ? 'tag-pago' : ''}">💰 Pagto: ${p.quitado}</div>
-                    ${!isDone ? `<button class="btn-done" onclick="marcar('${p.id}')">Finalizar Pedido</button>` : '<div style="margin-top:10px; color:green; font-weight:bold; text-align:center;">✓ CONCLUÍDO</div>'}
-                `;
-                lista.appendChild(div);
-            });
-        } catch (e) { document.getElementById('lista').innerHTML = "Erro ao carregar dados."; }
+    if(eProducao) {
+        document.getElementById('area-cadastro').style.display = 'none';
+        document.getElementById('titulo').innerText = "Painel da Produção 🛠️";
     }
 
-    async function enviar() {
-        const cli = document.getElementById('cliente').value;
-        const dat = document.getElementById('dataEnvio').value;
-        const prod = document.getElementById('produto').value;
-        const cor = document.getElementById('cor').value;
-        const est = document.getElementById('estampa').value;
-        const qui = document.getElementById('quitado').value;
+    async function listar() {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        const listaDiv = document.getElementById('lista');
+        listaDiv.innerHTML = '';
 
-        if(!cli || !prod || !dat) return alert("Por favor, preencha o Cliente, o Produto e a Data!");
+        data.reverse().forEach(p => {
+            // Lógica de cores baseada no status
+            let classeStatus = "";
+            if(p.status == "Criar arte") classeStatus = "status-arte";
+            if(p.status == "Esperando aprovação") classeStatus = "status-espera";
+            if(p.status == "Mesa de produção") classeStatus = "status-producao";
+            if(p.status == "Preparando") classeStatus = "status-preparando";
+            if(p.status == "Enviado") classeStatus = "status-enviado";
 
-        const btn = document.querySelector('.btn-add');
-        btn.innerText = "ENVIANDO...";
-        btn.disabled = true;
+            // Na tela da produção, talvez você queira esconder o que ainda está em "Arte"
+            // Se quiser que eles vejam tudo, apague a linha abaixo:
+            if(eProducao && (p.status == "Criar arte" || p.status == "Esperando aprovação")) return;
+
+            const div = document.createElement('div');
+            div.className = `card ${classeStatus}`;
+            
+            const indexAtual = FLUXO.indexOf(p.status);
+            const proximoStatus = FLUXO[indexAtual + 1];
+
+            div.innerHTML = `
+                <button class="btn-del" onclick="deletar('${p.id}')">X</button>
+                <div class="badge">${p.status.toUpperCase()}</div>
+                <div class="cliente">${p.cliente}</div>
+                <div style="font-size: 0.9rem; margin: 5px 0;">${p.produto}</div>
+                <div style="font-size: 0.8rem; color: #d93025;">📅 Prazo: ${new Date(p.dataEnvio).toLocaleString('pt-BR')}</div>
+                
+                ${proximoStatus ? 
+                    `<button class="btn-proximo" onclick="mudarStatus('${p.id}', '${proximoStatus}')">AVANÇAR PARA: ${proximoStatus} ➔</button>` : 
+                    `<div style="color: green; font-weight: bold; margin-top: 10px; text-align: center;">✅ PEDIDO FINALIZADO</div>`
+                }
+            `;
+            listaDiv.appendChild(div);
+        });
+    }
+
+    async function cadastrar() {
+        const cli = document.getElementById('cli').value;
+        const prod = document.getElementById('prod').value;
+        const data = document.getElementById('data').value;
+        if(!cli || !prod) return alert("Preencha os campos!");
 
         await fetch(SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ 
-                action: "add", 
-                id: Date.now(), 
-                cliente: cli, 
-                dataEnvio: dat, 
-                produto: prod, 
-                cor: cor, 
-                estampa: est, 
-                quitado: qui 
-            })
+            body: JSON.stringify({ action: "add", id: Date.now(), cliente: cli, produto: prod, dataEnvio: data, status: "Criar arte", quitado: "PENDENTE" })
         });
-        
-        // Limpar campos
-        document.getElementById('cliente').value = '';
-        document.getElementById('dataEnvio').value = '';
-        document.getElementById('produto').value = '';
-        document.getElementById('cor').value = '';
-        document.getElementById('estampa').value = '';
-        
-        btn.innerText = "🚀 LANÇAR PEDIDO";
-        btn.disabled = false;
+        location.reload();
+    }
+
+    async function mudarStatus(id, novoStatus) {
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "updateStatus", id: id, newStatus: novoStatus })
+        });
         listar();
     }
 
-    async function marcar(id) {
-        if(confirm("Deseja marcar como concluído?")) {
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "done", id: id }) });
-            listar();
-        }
-    }
-
     async function deletar(id) {
-        if(confirm("Excluir definitivamente?")) {
+        if(confirm("Excluir este pedido definitivamente?")) {
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
             listar();
         }
     }
 
-    setInterval(listar, 10000); 
+    setInterval(listar, 15000);
     listar();
 </script>
-
 </body>
 </html>
