@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Paulo - Fluxo e Urgência</title>
+    <title>Sistema Paulo - Gestão de Pedidos</title>
     <style>
         :root {
             --cor-arte: #9b59b6; --cor-espera: #f1c40f; --cor-producao: #e67e22;
@@ -56,7 +56,7 @@
 </div>
 
 <script>
-    // ⚠️ COLOQUE SEU LINK DO GOOGLE SCRIPT ABAIXO
+    // ⚠️ ATENÇÃO: Verifique se este link termina em /exec
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec"; 
     
     const params = new URLSearchParams(window.location.search);
@@ -69,20 +69,28 @@
     }
 
     async function listar() {
+        const listaDiv = document.getElementById('lista');
         try {
             const res = await fetch(SCRIPT_URL);
-            let data = await res.json();
-            const listaDiv = document.getElementById('lista');
+            let rawData = await res.json();
             
-            if (!data || data.length === 0) {
-                listaDiv.innerHTML = "<div class='text-center'>Nenhum pedido na fila.</div>";
+            if (!rawData || rawData.length === 0) {
+                listaDiv.innerHTML = "Nenhum pedido na fila.";
                 return;
             }
 
-            data.sort((a, b) => new Date(a.DataEnvio) - new Date(b.DataEnvio));
+            // Normaliza chaves para minúsculo para evitar erro de nomes
+            let data = rawData.map(item => {
+                let novo = {};
+                for (let key in item) { novo[key.toLowerCase().trim()] = item[key]; }
+                return novo;
+            });
+
+            // Ordena por data de envio
+            data.sort((a, b) => new Date(a.dataenvio) - new Date(b.dataenvio));
 
             listaDiv.innerHTML = '';
-           data.forEach(p => {
+            data.forEach(p => {
                 if (eProducao && p.status == "Enviado") return;
 
                 let statusTexto = p.status || "Criar arte";
@@ -97,14 +105,13 @@
                 const idx = FLUXO.indexOf(statusTexto);
                 const proximo = FLUXO[idx + 1];
 
-                // Ajuste de data para o formato brasileiro
                 const d = new Date(p.dataenvio);
-                const dataF = isNaN(d) ? (p.dataenvio || "Sem data") : d.toLocaleString('pt-BR');
+                const dataF = isNaN(d.getTime()) ? (p.dataenvio || "Sem data") : d.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
 
                 div.innerHTML = `
                     <button class="btn-del" onclick="deletar('${p.id}')">×</button>
                     <div class="tag-status">${statusTexto.toUpperCase()}</div>
-                    <div class="cliente">${p.cliente || 'Nome não encontrado'}</div>
+                    <div class="cliente">${p.cliente || 'Sem Nome'}</div>
                     <div class="detalhes">
                         <strong>Produto:</strong> ${p.produto || '-'}<br>
                         <strong>Detalhes:</strong> ${p.cor || '-'}
@@ -119,9 +126,9 @@
                 `;
                 listaDiv.appendChild(div);
             });
-            });
         } catch (e) { 
-            document.getElementById('lista').innerHTML = "Erro ao carregar dados."; 
+            console.error("Erro ao listar:", e);
+            listaDiv.innerHTML = "⚠️ Erro ao carregar dados. Verifique a aba 'Pedidos' e as permissões do Script."; 
         }
     }
 
@@ -129,42 +136,4 @@
         const cli = document.getElementById('cli').value;
         const prod = document.getElementById('prod').value;
         const cor = document.getElementById('cor_est').value;
-        const dat = document.getElementById('data').value;
-        const pag = document.getElementById('pag').value;
-        const btn = document.getElementById('btn-cad');
-
-        if(!cli || !prod || !dat) return alert("Preencha Cliente, Produto e Data!");
-
-        btn.disabled = true;
-        btn.innerText = "LANÇANDO...";
-
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: "add", id: Date.now(), cliente: cli, produto: prod, cor: cor, dataEnvio: dat, status: "Criar arte", quitado: pag })
-            });
-            location.reload();
-        } catch(e) {
-            alert("Erro ao salvar.");
-            btn.disabled = false;
-            btn.innerText = "LANÇAR NO SISTEMA";
-        }
-    }
-
-    async function mudarStatus(id, novoStatus) {
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateStatus", id: id, newStatus: novoStatus }) });
-        listar();
-    }
-
-    async function deletar(id) {
-        if(confirm("Excluir este pedido definitivamente?")) {
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
-            listar();
-        }
-    }
-
-    setInterval(listar, 30000); // Atualiza a cada 30 segundos
-    listar();
-</script>
-</body>
-</html>
+        const dat =
