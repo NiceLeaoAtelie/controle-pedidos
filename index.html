@@ -2,93 +2,65 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão Paulo - Produção</title>
+    <title>Destravar Sistema Paulo</title>
     <style>
-        :root { --cor-arte: #9b59b6; --cor-espera: #f1c40f; --cor-producao: #e67e22; --cor-preparando: #3498db; --cor-enviado: #2ecc71; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 10px; margin: 0; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .form-box { background: #eef2f7; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
-        .card { padding: 15px; margin-top: 15px; border-radius: 8px; border-left: 10px solid #ccc; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
-        .status-arte { border-left-color: var(--cor-arte); }
-        .status-espera { border-left-color: var(--cor-espera); }
-        .status-producao { border-left-color: var(--cor-producao); }
-        .status-preparando { border-left-color: var(--cor-preparando); }
-        .status-enviado { border-left-color: var(--cor-enviado); }
-        .btn-proximo { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 10px; cursor: pointer; }
-        .btn-del { position: absolute; top: 10px; right: 10px; border: none; background: none; color: #ccc; cursor: pointer; font-weight: bold; }
+        body { font-family: sans-serif; padding: 20px; background: #eee; }
+        .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+        .card { border: 1px solid #ccc; padding: 10px; margin-top: 10px; border-radius: 5px; background: #f9f9f9; }
+        input { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 id="titulo" style="text-align: center;">Gestão de Pedidos</h2>
+    <h3>Novo Pedido</h3>
+    <input type="text" id="cli" placeholder="Nome do Cliente">
+    <input type="text" id="prod" placeholder="Produto">
+    <button onclick="cadastrar()">LANÇAR NO SISTEMA</button>
 
-    <div id="area-cadastro" class="form-box">
-        <label>👤 CLIENTE:</label> <input type="text" id="cli">
-        <label>👕 PRODUTO:</label> <input type="text" id="prod">
-        <label>🎨 DETALHES:</label> <input type="text" id="cor_est">
-        <label>📅 ENVIO:</label> <input type="datetime-local" id="data">
-        <label>💰 FINANCEIRO:</label>
-        <select id="pag">
-            <option value="PENDENTE">Pendente</option>
-            <option value="METADE">50% Pago</option>
-            <option value="TOTAL">Total Pago</option>
-        </select>
-        <button onclick="cadastrar()" id="btn-cad" style="width:100%; background: #1a73e8; color: white; padding: 15px; border: none; border-radius: 8px; margin-top: 15px; font-weight: bold; cursor: pointer;">LANÇAR NO SISTEMA</button>
-    </div>
-
+    <hr>
     <div id="lista">Sincronizando...</div>
 </div>
 
 <script>
-    // ⚠️ COLE SEU NOVO LINK AQUI
+    // ⚠️ COLE SEU NOVO LINK AQUI ABAIXO
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec"; 
-    
-    const FLUXO = ["Criar arte", "Esperando aprovação", "Mesa de produção", "Preparando", "Enviado"];
 
     async function listar() {
         const listaDiv = document.getElementById('lista');
         try {
             const res = await fetch(SCRIPT_URL);
-            const rawData = await res.json();
+            const data = await res.json();
             
-            if (!rawData || rawData.length === 0) {
-                listaDiv.innerHTML = "Nenhum pedido na fila.";
+            listaDiv.innerHTML = '<h4>Pedidos na Fila:</h4>';
+            
+            if (data.length === 0) {
+                listaDiv.innerHTML += "Nenhum pedido encontrado.";
                 return;
             }
 
-            listaDiv.innerHTML = '';
-            rawData.forEach(p => {
-                const status = p.status || "Criar arte";
-                const idx = FLUXO.indexOf(status);
-                const proximo = FLUXO[idx + 1];
-
+            data.forEach(p => {
                 const div = document.createElement('div');
-                div.className = `card status-${status.toLowerCase().split(' ')[0]}`; // Simplificado
+                div.className = 'card';
+                // Usando nomes em minúsculo conforme o script do google envia agora
                 div.innerHTML = `
-                    <button class="btn-del" onclick="deletar('${p.id}')">×</button>
-                    <div style="font-size: 0.7rem; font-weight: bold; color: #888;">${status.toUpperCase()}</div>
-                    <div style="font-weight: bold; font-size: 1.1rem;">${p.cliente || 'Sem Nome'}</div>
-                    <div style="font-size: 0.9rem; color: #444;">${p.produto} | ${p.cor}</div>
-                    <div style="color: red; font-size: 0.8rem; font-weight: bold;">⏰ ${p.dataenvio}</div>
-                    ${proximo ? `<button class="btn-proximo" onclick="mudarStatus('${p.id}', '${proximo}')">AVANÇAR PARA ${proximo.toUpperCase()}</button>` : '✅ FINALIZADO'}
+                    <b>Cliente:</b> ${p.cliente || 'Sem nome'}<br>
+                    <b>Produto:</b> ${p.produto || '-'}<br>
+                    <button style="background:red; padding:2px; font-size:10px;" onclick="deletar('${p.id}')">EXCLUIR</button>
                 `;
                 listaDiv.appendChild(div);
             });
         } catch (e) {
-            listaDiv.innerHTML = "Erro ao carregar dados.";
+            listaDiv.innerHTML = "<b style='color:red'>ERRO DE CONEXÃO:</b> Verifique o link do script.";
+            console.error(e);
         }
     }
 
     async function cadastrar() {
         const cli = document.getElementById('cli').value;
-        const btn = document.getElementById('btn-cad');
-        if(!cli) return alert("Nome do cliente obrigatório!");
-
-        btn.disabled = true;
-        btn.innerText = "LANÇANDO...";
+        const prod = document.getElementById('prod').value;
+        if(!cli) return alert("Digite o nome!");
 
         try {
             await fetch(SCRIPT_URL, {
@@ -97,29 +69,18 @@
                     action: "add",
                     id: String(Date.now()),
                     cliente: cli,
-                    produto: document.getElementById('prod').value,
-                    cor: document.getElementById('cor_est').value,
-                    dataEnvio: document.getElementById('data').value,
+                    produto: prod,
+                    cor: "",
+                    dataEnvio: "",
                     status: "Criar arte",
-                    quitado: document.getElementById('pag').value
+                    quitado: ""
                 })
             });
-            location.reload();
-        } catch(e) {
-            alert("Erro ao salvar.");
-            btn.disabled = false;
-        }
-    }
-
-    async function mudarStatus(id, novo) {
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateStatus", id: id, newStatus: novo }) });
-        listar();
-    }
-
-    async function deletar(id) {
-        if(confirm("Excluir?")) {
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: id }) });
+            document.getElementById('cli').value = "";
+            document.getElementById('prod').value = "";
             listar();
+        } catch(e) {
+            alert("Erro ao salvar");
         }
     }
 
