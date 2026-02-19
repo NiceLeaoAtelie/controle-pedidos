@@ -82,10 +82,10 @@
             data.sort((a, b) => new Date(a.DataEnvio) - new Date(b.DataEnvio));
 
             listaDiv.innerHTML = '';
-            data.forEach(p => {
-                if (eProducao && p.Status == "Enviado") return;
+           data.forEach(p => {
+                if (eProducao && p.status == "Enviado") return;
 
-                let statusTexto = p.Status || "Criar arte";
+                let statusTexto = p.status || "Criar arte";
                 let classeStatus = "status-arte";
                 if(statusTexto == "Esperando aprovação") classeStatus = "status-espera";
                 if(statusTexto == "Mesa de produção") classeStatus = "status-producao";
@@ -97,26 +97,28 @@
                 const idx = FLUXO.indexOf(statusTexto);
                 const proximo = FLUXO[idx + 1];
 
-                const d = new Date(p.DataEnvio);
-                const dataF = isNaN(d) ? "Sem data" : d.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+                // Ajuste de data para o formato brasileiro
+                const d = new Date(p.dataenvio);
+                const dataF = isNaN(d) ? (p.dataenvio || "Sem data") : d.toLocaleString('pt-BR');
 
                 div.innerHTML = `
-                    <button class="btn-del" onclick="deletar('${p.ID}')">×</button>
+                    <button class="btn-del" onclick="deletar('${p.id}')">×</button>
                     <div class="tag-status">${statusTexto.toUpperCase()}</div>
-                    <div class="cliente">${p.Cliente || 'Sem Nome'}</div>
+                    <div class="cliente">${p.cliente || 'Nome não encontrado'}</div>
                     <div class="detalhes">
-                        <strong>Produto:</strong> ${p.Produto || '-'}<br>
-                        <strong>Detalhes:</strong> ${p.Cor || '-'}
+                        <strong>Produto:</strong> ${p.produto || '-'}<br>
+                        <strong>Detalhes:</strong> ${p.cor || '-'}
                     </div>
                     <div class="urgente">⏰ Envio: ${dataF}</div>
-                    <div style="font-size: 0.8rem; color: #555; margin-top:5px;">💰 Financeiro: ${p.Quitado || '-'}</div>
+                    <div style="font-size: 0.8rem; color: #555; margin-top:5px;">💰 Financeiro: ${p.quitado || '-'}</div>
                     
                     ${proximo ? 
-                        `<button class="btn-proximo" onclick="mudarStatus('${p.ID}', '${proximo}')">AVANÇAR PARA: ${proximo.toUpperCase()} ➔</button>` : 
-                        `<div style="color: green; font-weight: bold; margin-top: 10px; text-align: center;">✅ FINALIZADO / ENVIADO</div>`
+                        `<button class="btn-proximo" onclick="mudarStatus('${p.id}', '${proximo}')">AVANÇAR PARA: ${proximo.toUpperCase()} ➔</button>` : 
+                        `<div style="color: green; font-weight: bold; margin-top: 10px; text-align: center;">✅ FINALIZADO</div>`
                     }
                 `;
                 listaDiv.appendChild(div);
+            });
             });
         } catch (e) { 
             document.getElementById('lista').innerHTML = "Erro ao carregar dados."; 
