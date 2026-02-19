@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Paulo - Gestão de Pedidos</title>
+    <title>Sistema Paulo - Fluxo e Urgência</title>
     <style>
         :root {
             --cor-arte: #9b59b6; --cor-espera: #f1c40f; --cor-producao: #e67e22;
@@ -16,11 +16,14 @@
         label { font-weight: bold; font-size: 12px; color: #555; display: block; margin-top: 8px; }
         input, select { width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         .card { padding: 15px; margin-top: 15px; border-radius: 8px; border-left: 10px solid #ccc; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; }
+        
+        /* Cores das Bordas Lateral */
         .status-arte { border-left-color: var(--cor-arte); }
         .status-espera { border-left-color: var(--cor-espera); }
         .status-producao { border-left-color: var(--cor-producao); }
         .status-preparando { border-left-color: var(--cor-preparando); }
         .status-enviado { border-left-color: var(--cor-enviado); background: #f0fff4; }
+        
         .cliente { font-weight: bold; font-size: 1.2rem; color: #2c3e50; }
         .detalhes { font-size: 0.95rem; color: #444; margin: 8px 0; padding: 8px; background: #f9f9f9; border-radius: 4px; line-height: 1.4; }
         .tag-status { display: inline-block; padding: 3px 10px; font-size: 11px; border-radius: 20px; background: #333; color: white; font-weight: bold; margin-bottom: 5px; }
@@ -39,7 +42,7 @@
         <input type="text" id="cli" placeholder="Nome do cliente">
         <label>👕 PRODUTO:</label>
         <input type="text" id="prod" placeholder="Ex: Camiseta G">
-        <label>🎨 DETALHES:</label>
+        <label>🎨 COR E ESTAMPA:</label>
         <input type="text" id="cor_est" placeholder="Ex: Azul / Logo Peito">
         <label>📅 DATA DE ENVIO:</label>
         <input type="datetime-local" id="data">
@@ -52,10 +55,11 @@
         <button onclick="cadastrar()" id="btn-cad" style="background: #1a73e8; color: white; margin-top: 15px; font-weight: bold; border: none; cursor: pointer; padding: 15px; border-radius: 8px; width: 100%;">LANÇAR NO SISTEMA</button>
     </div>
 
-    <div id="lista">Buscando pedidos atualizados...</div>
+    <div id="lista">Sincronizando com a planilha...</div>
 </div>
 
 <script>
+    // ⚠️ COLOQUE SEU LINK DO GOOGLE SCRIPT AQUI ABAIXO
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec"; 
     
     const params = new URLSearchParams(window.location.search);
@@ -94,6 +98,13 @@
                 const idx = FLUXO.indexOf(statusTexto);
                 const proximo = FLUXO[idx + 1];
 
+                // Formatação da data
+                let dataExibicao = "Sem data";
+                if (p.dataenvio) {
+                    const d = new Date(p.dataenvio);
+                    dataExibicao = isNaN(d.getTime()) ? p.dataenvio : d.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+                }
+
                 div.innerHTML = `
                     <button class="btn-del" onclick="deletar('${p.id}')">×</button>
                     <div class="tag-status">${statusTexto.toUpperCase()}</div>
@@ -102,7 +113,7 @@
                         <strong>Produto:</strong> ${p.produto || '-'}<br>
                         <strong>Detalhes:</strong> ${p.cor || '-'}
                     </div>
-                    <div class="urgente">⏰ Envio: ${p.dataenvio || 'Não definida'}</div>
+                    <div class="urgente">⏰ Envio: ${dataExibicao}</div>
                     <div style="font-size: 0.8rem; color: #555; margin-top:5px;">💰 Financeiro: ${p.quitado || '-'}</div>
                     
                     ${proximo ? 
@@ -114,14 +125,19 @@
             });
         } catch (e) { 
             console.error(e);
-            listaDiv.innerHTML = "Erro ao carregar dados da planilha."; 
+            listaDiv.innerHTML = "Erro ao carregar dados. Verifique a conexão."; 
         }
     }
 
     async function cadastrar() {
         const cli = document.getElementById('cli').value;
+        const prod = document.getElementById('prod').value;
+        const cor = document.getElementById('cor_est').value;
+        const dat = document.getElementById('data').value;
+        const pag = document.getElementById('pag').value;
         const btn = document.getElementById('btn-cad');
-        if(!cli) return alert("Preencha o nome do cliente!");
+
+        if(!cli || !prod) return alert("Preencha ao menos Cliente e Produto!");
 
         btn.disabled = true;
         btn.innerText = "LANÇANDO...";
@@ -133,36 +149,46 @@
                     action: "add",
                     id: String(Date.now()),
                     cliente: cli,
-                    produto: document.getElementById('prod').value,
-                    cor: document.getElementById('cor_est').value,
-                    dataEnvio: document.getElementById('data').value,
+                    produto: prod,
+                    cor: cor,
+                    dataEnvio: dat,
                     status: "Criar arte",
-                    quitado: document.getElementById('pag').value
+                    quitado: pag
                 })
             });
+            // Limpa e recarrega
             document.getElementById('cli').value = "";
             document.getElementById('prod').value = "";
+            document.getElementById('cor_est').value = "";
+            document.getElementById('data').value = "";
             btn.disabled = false;
             btn.innerText = "LANÇAR NO SISTEMA";
             listar();
         } catch(e) {
             alert("Erro ao salvar.");
             btn.disabled = false;
+            btn.innerText = "LANÇAR NO SISTEMA";
         }
     }
 
     async function mudarStatus(id, novoStatus) {
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateStatus", id: String(id), newStatus: novoStatus }) });
-        listar();
+        try {
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateStatus", id: String(id), newStatus: novoStatus }) });
+            listar();
+        } catch(e) { alert("Erro ao atualizar."); }
     }
 
     async function deletar(id) {
-        if(confirm("Excluir este pedido?")) {
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: String(id) }) });
-            listar();
+        if(confirm("Excluir definitivamente este pedido?")) {
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: String(id) }) });
+                listar();
+            } catch(e) { alert("Erro ao excluir."); }
         }
     }
 
+    // Atualiza a cada 30 segundos automaticamente
+    setInterval(listar, 30000);
     listar();
 </script>
 </body>
