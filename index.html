@@ -49,14 +49,15 @@
             <option value="METADE">50% Pago</option>
             <option value="TOTAL">Total Pago</option>
         </select>
-        <button onclick="cadastrar()" id="btn-cad" style="background: #1a73e8; color: white; margin-top: 15px; font-weight: bold; border: none; cursor: pointer; padding: 15px; border-radius: 8px;">LANÇAR NO SISTEMA</button>
+        <button onclick="cadastrar()" id="btn-cad" style="background: #1a73e8; color: white; width:100%; margin-top: 15px; font-weight: bold; border: none; cursor: pointer; padding: 15px; border-radius: 8px;">LANÇAR NO SISTEMA</button>
     </div>
 
     <div id="lista">Sincronizando com a planilha...</div>
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec"; // 👈 NÃO ESQUEÇA DE COLAR SEU LINK AQUI
+    // ⚠️ COLOQUE SEU LINK DO GOOGLE SCRIPT ABAIXO
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec"; 
     
     const params = new URLSearchParams(window.location.search);
     const eProducao = params.has('producao');
@@ -74,19 +75,17 @@
             const listaDiv = document.getElementById('lista');
             
             if (!data || data.length === 0) {
-                listaDiv.innerHTML = "Nenhum pedido na fila.";
+                listaDiv.innerHTML = "<div class='text-center'>Nenhum pedido na fila.</div>";
                 return;
             }
 
-            // Ordena por data (mais urgente primeiro)
-            data.sort((a, b) => new Date(a.dataEnvio) - new Date(b.dataEnvio));
+            data.sort((a, b) => new Date(a.DataEnvio) - new Date(b.DataEnvio));
 
             listaDiv.innerHTML = '';
             data.forEach(p => {
-                // Se for tela de produção e o pedido já foi enviado, não mostra.
-                if (eProducao && p.status == "Enviado") return;
+                if (eProducao && p.Status == "Enviado") return;
 
-                let statusTexto = p.status || "Criar arte";
+                let statusTexto = p.Status || "Criar arte";
                 let classeStatus = "status-arte";
                 if(statusTexto == "Esperando aprovação") classeStatus = "status-espera";
                 if(statusTexto == "Mesa de produção") classeStatus = "status-producao";
@@ -98,29 +97,29 @@
                 const idx = FLUXO.indexOf(statusTexto);
                 const proximo = FLUXO[idx + 1];
 
-                const d = new Date(p.dataEnvio);
+                const d = new Date(p.DataEnvio);
                 const dataF = isNaN(d) ? "Sem data" : d.toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
 
                 div.innerHTML = `
-                    <button class="btn-del" onclick="deletar('${p.id}')">×</button>
+                    <button class="btn-del" onclick="deletar('${p.ID}')">×</button>
                     <div class="tag-status">${statusTexto.toUpperCase()}</div>
-                    <div class="cliente">${p.cliente || 'Sem Nome'}</div>
+                    <div class="cliente">${p.Cliente || 'Sem Nome'}</div>
                     <div class="detalhes">
-                        <strong>Produto:</strong> ${p.produto || '-'}<br>
-                        <strong>Detalhes:</strong> ${p.cor || '-'}
+                        <strong>Produto:</strong> ${p.Produto || '-'}<br>
+                        <strong>Detalhes:</strong> ${p.Cor || '-'}
                     </div>
                     <div class="urgente">⏰ Envio: ${dataF}</div>
-                    <div style="font-size: 0.8rem; color: #555; margin-top:5px;">💰 Financeiro: ${p.quitado || '-'}</div>
+                    <div style="font-size: 0.8rem; color: #555; margin-top:5px;">💰 Financeiro: ${p.Quitado || '-'}</div>
                     
                     ${proximo ? 
-                        `<button class="btn-proximo" onclick="mudarStatus('${p.id}', '${proximo}')">AVANÇAR PARA: ${proximo.toUpperCase()} ➔</button>` : 
+                        `<button class="btn-proximo" onclick="mudarStatus('${p.ID}', '${proximo}')">AVANÇAR PARA: ${proximo.toUpperCase()} ➔</button>` : 
                         `<div style="color: green; font-weight: bold; margin-top: 10px; text-align: center;">✅ FINALIZADO / ENVIADO</div>`
                     }
                 `;
                 listaDiv.appendChild(div);
             });
         } catch (e) { 
-            document.getElementById('lista').innerHTML = "Erro ao carregar dados. Verifique a conexão."; 
+            document.getElementById('lista').innerHTML = "Erro ao carregar dados."; 
         }
     }
 
@@ -140,7 +139,7 @@
         try {
             await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({ action: "add", id: Date.now(), cliente: cli, produto: prod, cor: cor, estampa: "", dataEnvio: dat, status: "Criar arte", quitado: pag })
+                body: JSON.stringify({ action: "add", id: Date.now(), cliente: cli, produto: prod, cor: cor, dataEnvio: dat, status: "Criar arte", quitado: pag })
             });
             location.reload();
         } catch(e) {
@@ -162,7 +161,7 @@
         }
     }
 
-    setInterval(listar, 20000);
+    setInterval(listar, 30000); // Atualiza a cada 30 segundos
     listar();
 </script>
 </body>
