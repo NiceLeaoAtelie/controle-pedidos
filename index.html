@@ -59,7 +59,6 @@
 </div>
 
 <script>
-    // ⚠️ COLOQUE SEU LINK DO GOOGLE SCRIPT AQUI ABAIXO
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxptJfRSBxTmxJHyxFulO2zYWnrLAaZxd-U00VKITcp21rYTuExf7KYSOM05AR8qHoaBA/exec"; 
     
     const params = new URLSearchParams(window.location.search);
@@ -98,7 +97,6 @@
                 const idx = FLUXO.indexOf(statusTexto);
                 const proximo = FLUXO[idx + 1];
 
-                // Formatação da data
                 let dataExibicao = "Sem data";
                 if (p.dataenvio) {
                     const d = new Date(p.dataenvio);
@@ -142,30 +140,38 @@
         btn.disabled = true;
         btn.innerText = "LANÇANDO...";
 
+        const payload = {
+            action: "add",
+            id: String(Date.now()),
+            cliente: cli,
+            produto: prod,
+            cor: cor,
+            dataEnvio: dat,
+            status: "Criar arte",
+            quitado: pag
+        };
+
         try {
             await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({
-                    action: "add",
-                    id: String(Date.now()),
-                    cliente: cli,
-                    produto: prod,
-                    cor: cor,
-                    dataEnvio: dat,
-                    status: "Criar arte",
-                    quitado: pag
-                })
+                mode: 'no-cors', // Fundamental para não travar
+                cache: 'no-cache',
+                body: JSON.stringify(payload)
             });
-            // Limpa e recarrega
-            document.getElementById('cli').value = "";
-            document.getElementById('prod').value = "";
-            document.getElementById('cor_est').value = "";
-            document.getElementById('data').value = "";
-            btn.disabled = false;
-            btn.innerText = "LANÇAR NO SISTEMA";
-            listar();
+            
+            // Como usamos no-cors, o navegador não lê a resposta, então limpamos após um delay
+            setTimeout(() => {
+                document.getElementById('cli').value = "";
+                document.getElementById('prod').value = "";
+                document.getElementById('cor_est').value = "";
+                document.getElementById('data').value = "";
+                btn.disabled = false;
+                btn.innerText = "LANÇAR NO SISTEMA";
+                listar();
+            }, 1000);
+
         } catch(e) {
-            alert("Erro ao salvar.");
+            alert("Erro na conexão ao tentar salvar.");
             btn.disabled = false;
             btn.innerText = "LANÇAR NO SISTEMA";
         }
@@ -173,21 +179,28 @@
 
     async function mudarStatus(id, novoStatus) {
         try {
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "updateStatus", id: String(id), newStatus: novoStatus }) });
-            listar();
+            await fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors',
+                body: JSON.stringify({ action: "updateStatus", id: String(id), newStatus: novoStatus }) 
+            });
+            setTimeout(listar, 1000);
         } catch(e) { alert("Erro ao atualizar."); }
     }
 
     async function deletar(id) {
         if(confirm("Excluir definitivamente este pedido?")) {
             try {
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "delete", id: String(id) }) });
-                listar();
+                await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    mode: 'no-cors',
+                    body: JSON.stringify({ action: "delete", id: String(id) }) 
+                });
+                setTimeout(listar, 1000);
             } catch(e) { alert("Erro ao excluir."); }
         }
     }
 
-    // Atualiza a cada 30 segundos automaticamente
     setInterval(listar, 30000);
     listar();
 </script>
